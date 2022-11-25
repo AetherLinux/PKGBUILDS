@@ -1,0 +1,59 @@
+# Maintainer: Christian Rebischke <chris.rebischke@archlinux.org>
+# Contributor: ml <>
+pkgname=cmctl
+pkgver=1.10.0
+pkgrel=1
+pkgdesc='Automatically provision and manage TLS certificates in Kubernetes'
+arch=('x86_64' 'aarch64')
+url='https://github.com/jetstack/cert-manager'
+license=('Apache')
+depends=('kubectl')
+makedepends=('git' 'go')
+groups=('kubectl-plugins')
+source=("$url/archive/v$pkgver/$pkgname-$pkgver.tar.gz")
+sha512sums=('afcd0b23da354bee667522ce965d4850bd8f6227c074efa2b4d3d0564b2d60a504143852ad710d6849a80d23bab34dd68894b7d93245984011b6e7b36c6d78af')
+b2sums=('4e3c05292ffcb690cd2103da160921418edb40b320a0ed0a5c77b7c4102b2e0e002ebd912ad650bdbef90a2710bc1228e9ed3fac01f42c79bbb184a52392deaf')
+
+build() {
+  local _x _commit
+  _commit=$(bsdcat "$pkgname-$pkgver.tar.gz" | git get-tar-commit-id)
+  _x=(
+    AppVersion="v$pkgver"
+    AppGitCommit="${_commit:?}"
+    AppGitState="clean"
+  )
+
+  cd cert-manager-"$pkgver"
+  export CGO_ENABLED=1
+  export CGO_LDFLAGS="$LDFLAGS"
+  export CGO_CFLAGS="$CFLAGS"
+  export CGO_CPPFLAGS="$CPPFLAGS"
+  export CGO_CXXFLAGS="$CXXFLAGS"
+  export GOFLAGS='-buildmode=pie -trimpath -modcacherw -mod=readonly'
+  go build -ldflags="-linkmode=external ${_x[*]/#/-X=github.com/jetstack/cert-manager/pkg/util.} 
+  -X github.com/jetstack/cert-manager/cmd/ctl/pkg/build.name=cmctl 
+  -X github.com/jetstack/cert-manager/cmd/ctl/pkg/build/commands.registerCompletion=true" ./cmd/ctl
+}
+
+check() {
+  cd cert-manager-"$pkgver"
+  # we don't want e2e and other tests that explicitly want bazel
+  go test -short ./cmd/ctl/...
+}
+
+package() {
+  cd cert-manager-"$pkgver"
+  install -Dm755 ctl "$pkgdir"/usr/bin/cmctl
+
+  # build bash completions
+  #mkdir -p "${pkgdir}/usr/share/bash-completion/completions"
+  #"$pkgdir"/usr/bin/cmctl completion bash > "${pkgdir}/usr/share/bash-completion/completions/cmctl"
+
+  ## build zsh completions
+  #mkdir -p "${pkgdir}/usr/share/zsh/site-functions"
+  #"$pkgdir"/usr/bin/cmctl completion zsh > "${pkgdir}/usr/share/zsh/site-functions/_cmctl"
+
+  ## build fish completions
+  #mkdir -p "${pkgdir}/usr/share/fish/vendor_completions.d/"
+  #"$pkgdir"/usr/bin/cmctl completion fish > "${pkgdir}/usr/share/fish/vendor_completions.d/cmctl.fish"
+}

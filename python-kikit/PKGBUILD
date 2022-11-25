@@ -1,0 +1,35 @@
+# Maintainer: Filipe Laíns (FFY00) <lains@archlinux.org>
+
+_pkgname=KiKit
+pkgname=python-kikit
+pkgver=1.1.1
+pkgrel=1
+pkgdesc='Automation tools for KiCAD'
+arch=('any')
+url='https://github.com/yaqwsx/KiKit'
+license=('MIT')
+depends=('python' 'kicad' 'python-numpy' 'python-shapely' 'python-click' 'python-markdown2'
+         'python-pybars3' 'python-solidpython' 'python-pcbnewtransition' 'python-commentjson')
+makedepends=('python-build' 'python-installer' 'python-setuptools' 'python-wheel')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
+sha512sums=('a9609d3fec80a3ab00e683835fb9527988016da43790915ab009c229fba28178c9d63338279fc73788b11f9c694bf139bfa9b342c7c4db63d6c0f8b9652f541b')
+
+prepare() {
+  sed -i '/versioneer/d' $_pkgname-$pkgver/setup.py
+}
+
+build() {
+  cd $_pkgname-$pkgver
+
+  python -m build -nw
+}
+
+package() {
+  cd $_pkgname-$pkgver
+
+  python -m installer -d "$pkgdir" dist/*.whl
+
+  install -Dm 644 LICENCE "$pkgdir"/usr/share/licenses/$pkgname/LICENCE
+}
+
+# vim:set ts=2 sw=2 et:

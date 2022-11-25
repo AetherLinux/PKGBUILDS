@@ -1,0 +1,31 @@
+# Maintainer: Felix Yan <felixonmars@archlinux.org>
+
+pkgname=python-btrees
+pkgver=4.11.0
+pkgrel=1
+pkgdesc='A fancy and practical functional tools'
+arch=('x86_64')
+license=('ZPL')
+url='https://github.com/zopefoundation/btrees'
+depends=('python-persistent' 'python-zope-interface')
+makedepends=('python-setuptools')
+checkdepends=('python-transaction' 'python-zope-testrunner')
+source=("$pkgname-$pkgver.tar.gz::https://github.com/zopefoundation/btrees/archive/$pkgver.tar.gz")
+sha512sums=('b25c16419202029dd3f1c3d94e5e4b0751d52f9dd5582090f3032ade2ff0e7fc460df2edcddff107c1ca3f419104750072bb362e7c2e00388765e7577e5d42c1')
+
+build() {
+  cd BTrees-$pkgver
+  python setup.py build
+}
+
+check() {
+  cd BTrees-$pkgver
+  PYTHONPATH="$PWD/build/lib.linux-$CARCH-cpython-310" python -m zope.testrunner --test-path=src
+}
+
+package() {
+  cd BTrees-$pkgver
+  python setup.py install --root="$pkgdir" --optimize=1
+}
+
+# vim:set ts=2 sw=2 et:

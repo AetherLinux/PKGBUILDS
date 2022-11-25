@@ -1,0 +1,31 @@
+# Maintainer: Levente Polyak <anthraxx[at]archlinux[dot]org>
+
+pkgname=python-tweepy
+_pypiname=tweepy
+pkgver=4.10.1
+pkgrel=1
+pkgdesc='Python library for accessing the entire Twitter API'
+url='https://www.tweepy.org/'
+arch=('any')
+license=('MIT')
+depends=('python' 'python-requests' 'python-requests-oauthlib' 'python-six' 'python-pysocks')
+makedepends=('python-setuptools' 'python-pip' 'python-requests' 'python-requests-oauthlib'
+             'python-six' 'python-pysocks')
+source=(https://github.com/tweepy/${_pypiname}/archive/v${pkgver}/${_pypiname}-${pkgver}.tar.gz)
+sha256sums=('0afab3130efa1c21b76f6480a4f028bdfb34493cc0bdc1bf93e0ece383d43109')
+sha512sums=('bcc22f871cdc016004707d00ef562dd8c75d1cd684d1077d7336970ce76565d698e46cbf6477be70d72f14fa5f6c4a93a37408c5b8993d115108419b96a60b53')
+
+build() {
+  cd ${_pypiname}-${pkgver}
+  python setup.py build
+}
+
+package() {
+  cd ${_pypiname}-${pkgver}
+  python setup.py install -O1 --root="${pkgdir}" --prefix=/usr --skip-build
+  install -Dm 644 LICENSE -t "${pkgdir}/usr/share/licenses/${pkgname}"
+  install -d "${pkgdir}/usr/share/doc/${pkgname}"
+  cp -r examples "${pkgdir}/usr/share/doc/${pkgname}"
+}
+
+# vim: ts=2 sw=2 et:

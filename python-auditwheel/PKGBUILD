@@ -1,0 +1,52 @@
+# Maintainer: Filipe Laíns (FFY00) <lains@archlinux.org>
+
+_pkgname=auditwheel
+pkgname=python-$_pkgname
+pkgver=5.1.2
+pkgrel=1
+pkgdesc='Auditing and relabeling cross-distribution Linux wheels'
+arch=('any')
+url='https://github.com/pypa/auditwheel'
+license=('MIT' 'BSD')
+depends=('python' 'python-wheel' 'python-pyelftools' 'unzip' 'patchelf')
+makedepends=('python-build' 'python-installer' 'python-setuptools' 'python-setuptools-scm' 'python-wheel')
+#checkdepends=('python-pytest' 'python-jsonschema' 'python-pretend' 'python-docker')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/$pkgver.tar.gz")
+sha512sums=('6536b2fd9ce568a2079abbe83469fe3e25ce28a947b37f63302b440d86db94d8d5baa168a5ccdecf95f8109f501da945c5f093545b0f4e3bbca4542cbe90bb0f')
+
+prepare() {
+  cd $_pkgname-$pkgver
+
+  # replace the vendored wheel module with the one on the system
+  find -type f -name '*.py' -exec \
+      sed -i 's|\._vendor\.wheel|wheel|' '{}' \+
+
+  # remove vendored wheel module
+  rm -rf auditwheel/_vendor
+}
+
+build() {
+  cd $_pkgname-$pkgver
+
+  SETUPTOOLS_SCM_PRETEND_VERSION=$pkgver python -m build -nw
+}
+
+#check() {
+#  cd $_pkgname-$pkgver
+#
+#  python -m venv --system-site-packages test
+#  test/bin/python -m installer dist/*.whl
+#
+#  PATH="test/bin:$PATH" python -m pytest
+#}
+
+package() {
+  cd $_pkgname-$pkgver
+
+  python -m installer -d "$pkgdir" dist/*.whl
+  #install -Dm 644 auditwheel/policy/policy.json "$pkgdir"/usr/lib/python3.10/site-packages/auditwheel/policy/policy.json
+
+  install -Dm 644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+}
+
+# vim:set ts=2 sw=2 et:

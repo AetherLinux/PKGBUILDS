@@ -1,0 +1,36 @@
+# Maintainer: Levente Polyak <anthraxx[at]archlinux[dot]org>
+
+_pyname=ailment
+pkgname=python-${_pyname}
+pkgver=9.2.15
+pkgrel=1
+pkgdesc='The angr intermediate language'
+url='https://github.com/angr/ailment'
+license=('custom:BSD2')
+arch=('any')
+depends=('python' 'python-claripy' 'python-pyvex' 'python-pypcode')
+makedepends=('python-build' 'python-installer' 'python-wheel' 'python-setuptools')
+checkdepends=('python-pytest' 'python-archinfo')
+source=("${url}/archive/v${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha512sums=('fdb5becc9dc3b21cc6d0c30bce3dab7f43b32fc1317b5020b5af7aad6afd840ec4b8311303efc564cb8f5f17d6cd5c9bc4e8976d4c9012231dac9cc702e8d381')
+b2sums=('0eb7fdb3d218af57642eb7505bea6dbad0a3dc2d716a35e84aa411b2b5a15f4c1eff6f741ac9bb973471e7b9039e3817b005a165fd01bc40865e1094021a95aa')
+
+build() {
+  cd ${_pyname}-${pkgver}
+  python -m build --wheel --no-isolation
+}
+
+check() {
+  cd ${_pyname}-${pkgver}
+  # TODO: needed for angr (hard dep)
+  # PYTHONPATH=build/lib pytest
+}
+
+package() {
+  cd ${_pyname}-${pkgver}
+  python -m installer --destdir="$pkgdir" dist/*.whl
+  install -Dm 644 LICENSE -t "${pkgdir}/usr/share/licenses/${pkgname}"
+  install -Dm 644 README.md -t "${pkgdir}/usr/share/doc/${pkgname}"
+}
+
+# vim: ts=2 sw=2 et:

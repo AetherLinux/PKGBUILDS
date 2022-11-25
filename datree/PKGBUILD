@@ -1,0 +1,34 @@
+# Maintainer: Christian Rebischke <chris.rebischke@archlinux.org>
+pkgname=datree
+pkgver=1.6.19
+pkgrel=1
+pkgdesc="CLI tool to ensure K8s manifests and Helm charts follow best practices as well as your organization’s policies"
+arch=('x86_64')
+url='https://github.com/datreeio/datree'
+license=('Apache')
+depends=('kubectl')
+makedepends=('git' 'go')
+source=("${pgname}-${pkgver}.tar.gz::https://github.com/datreeio/datree/archive/refs/tags/${pkgver}.tar.gz")
+sha512sums=('f38b12c21c8faae8379a57cf68707f526a95ca35dfb09e1173b244045de019473c054c4c0d8ffa0b214605de912408604fabb3bf801601201cf2fa8e07a89389')
+b2sums=('d381f86cf6f614b56a73c4443f497484e9d7493d59be65296374d9e795451ed7797aeed1acc86078d9255081e291659128136789fe0036e0cf415b375c71e9dc')
+options=('!lto')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  export CGO_LDFLAGS="$LDFLAGS"
+  export CGO_CFLAGS="$CFLAGS"
+  export CGO_CPPFLAGS="$CPPFLAGS"
+  export CGO_CXXFLAGS="$CXXFLAGS"
+  export GOFLAGS='-buildmode=pie -trimpath -modcacherw -mod=readonly'
+  go build -ldflags="-w -s -linkmode=external" -o datree .
+}
+
+check() {
+  cd "${pkgname}-${pkgver}"
+  go test ./...
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  install -Dm755 datree "${pkgdir}/usr/bin/datree"
+}

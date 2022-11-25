@@ -1,0 +1,37 @@
+# Maintainer: Rémy Oudompheng <remy@archlinux.org>
+
+pkgname='perl-perlio-utf8-strict'
+_dist=PerlIO-utf8_strict
+pkgver=0.009
+pkgrel=1
+pkgdesc="Fast and correct UTF-8 PerlIO"
+arch=('x86_64')
+license=('PerlArtistic' 'GPL')
+options=('!emptydirs')
+depends=('perl')
+makedepends=('perl-test-exception')
+url="https://metacpan.org/release/${_dist}"
+source=(https://search.cpan.org/CPAN/authors/id/L/LE/LEONT/${_dist}-${pkgver}.tar.gz)
+md5sums=('54811ae16ff5f1cbc50d0cfe88b2c372')
+sha256sums=('ba82cf144820655d6d4836d12dde65f8895a3d905aeb4aa0b421249f43284c14')
+
+build() {
+    cd "${srcdir}/${_dist}-${pkgver}"
+    unset PERL5LIB PERL_MM_OPT PERL_MB_OPT PERL_LOCAL_LIB_ROOT
+    export PERL_MM_USE_DEFAULT=1 PERL_AUTOINSTALL=--skipdeps
+    perl Makefile.PL
+    make
+}
+
+check() {
+    cd "${srcdir}/${_dist}-${pkgver}"
+    unset PERL5LIB PERL_MM_OPT PERL_MB_OPT PERL_LOCAL_LIB_ROOT
+    export PERL_MM_USE_DEFAULT=1
+    make test
+}
+
+package() {
+    cd "${srcdir}/${_dist}-${pkgver}"
+    unset PERL5LIB PERL_MM_OPT PERL_MB_OPT PERL_LOCAL_LIB_ROOT
+    make install INSTALLDIRS=vendor DESTDIR="$pkgdir"
+}

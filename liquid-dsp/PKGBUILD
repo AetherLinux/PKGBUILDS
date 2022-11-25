@@ -1,0 +1,72 @@
+# Maintainer: Filipe Laíns (FFY00) <lains@archlinux.org>
+
+pkgbase=liquid-dsp
+pkgname=($pkgbase $pkgbase-sse4.1)
+pkgver=1.4.0
+pkgrel=1
+pkgdesc='Open-source signal processing library for software-defined radios'
+arch=('x86_64')
+url='https://liquidsdr.org'
+license=('MIT')
+depends=('glibc')
+optdepends=('fftw: efficient FFT')
+source=("$url/downloads/$pkgbase-$pkgver.tar.gz")
+sha512sums=('a0c6f76896793f1bacf8c6cc4c34f7adac3dd9857c6f51cf8eb756df09a1d3ebd2c38a25eba23b574d3f11381922bed43ae2016af9294f3d3a8f1f2d343e6f10')
+
+prepare() {
+    mkdir $pkgbase-sse4.1-$pkgver
+    cp -r $pkgbase-$pkgver/* $pkgbase-sse4.1-$pkgver
+
+    sed -i 's|ax_cv_have_sse41_ext=.*|ax_cv_have_sse41_ext=yes|' $pkgbase-sse4.1-$pkgver/scripts/ax_ext.m4
+}
+
+build() {
+    echo 'Building liquid-dsp...'
+    cd "$srcdir"/$pkgbase-$pkgver
+
+    autoreconf -vif
+    enable_simdoverride='' ./configure --prefix=/usr
+
+    make
+
+    echo 'Building liquid-dsp-sse4.1...'
+    cd "$srcdir"/$pkgbase-sse4.1-$pkgver
+
+    autoreconf -vif
+    ./configure --prefix=/usr
+
+    make
+}
+
+check() {
+    echo 'Checking liquid-dsp...'
+    cd "$srcdir"/$pkgbase-$pkgver
+
+    make check
+
+    echo 'Checking liquid-dsp-sse4.1...'
+    cd "$srcdir"/$pkgbase-sse4.1-$pkgver
+
+    make check
+}
+
+package_liquid-dsp() {
+    cd $pkgbase-$pkgver
+
+    make DESTDIR="$pkgdir" install
+
+    install -Dm 644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+}
+
+package_liquid-dsp-sse4.1() {
+    pkgdesc="$pkgdesc (with SSE 4.1 extensions)"
+    provides=('liquid-dsp')
+    conflicts=('liquid-dsp')
+
+    cd $pkgbase-sse4.1-$pkgver
+
+    make DESTDIR="$pkgdir" install
+
+    install -Dm 644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+}
+

@@ -1,0 +1,36 @@
+# Maintainer: Levente Polyak <anthraxx[at]archlinux[dot]org>
+# Contributor: Letu Ren <fantasquex at gmail dot com>
+
+_pyname=pyxbe
+pkgname=python-${_pyname}
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Library to work with XBE files, the executable file format for the original Xbox game console'
+url='https://github.com/mborgerson/pyxbe'
+arch=('any')
+license=('custom:MIT')
+depends=('python')
+makedepends=('python-build' 'python-installer' 'python-wheel' 'python-setuptools')
+checkdepends=('python-pytest')
+source=("${url}/archive/v${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha512sums=('e88c0242c45ff35521557023f4901282bddd0d06927460d611b2fe332de3c3c60a1f59bb4663d9b6477b79d15ee6d5392feaa4eba55ffafb629b8821073a90eb')
+b2sums=('ec05d295e388ff611c52e66b9937adfb9a24de40dc7092f5be581cb2024d00522832b2f0267c26a76cf8df2f58264ef3fb3160a4768b12ae02ffa63282295700')
+
+build() {
+  cd ${_pyname}-${pkgver}
+  python -m build --wheel --no-isolation
+}
+
+check() {
+  cd ${_pyname}-${pkgver}/tests
+  PYTHONPATH="${PWD}/../build/lib" pytest
+}
+
+package() {
+  cd ${_pyname}-${pkgver}
+  python -m installer --destdir="$pkgdir" dist/*.whl
+  install -Dm 644 LICENSE.txt -t "${pkgdir}/usr/share/licenses/${pkgname}"
+  install -Dm 644 README.md -t "${pkgdir}/usr/share/doc/${pkgname}"
+}
+
+# vim: ts=2 sw=2 et:

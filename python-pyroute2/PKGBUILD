@@ -1,0 +1,44 @@
+# Maintainer: Thore Bödecker <foxxx0@archlinux.org>
+# Contributor: brent s. <bts[at]square-r00t[dot]net>
+# Contributor: Alexander Phinikarides <alexisph _AT_ gmail _DOT_ com>
+
+pkgbase='python-pyroute2'
+_pkgbase="${pkgbase//python-/}"
+pkgname=("python-${_pkgbase}")
+pkgdesc="A pure Python netlink and Linux network configuration library"
+pkgver=0.6.13
+pkgrel=1
+arch=('any')
+url="https://docs.pyroute2.org/"
+license=('GPL2' 'Apache')
+depends=('python')
+makedepends=('python' 'python-pip' 'python-setuptools' 'python-setuptools-scm' 'python-sphinx' 'git' 'python-aafigure' 'twine' 'python-black')
+checkdepends=('python-pytest')
+source=("${_pkgbase}-${pkgver}.tar.gz::https://github.com/svinota/${_pkgbase}/archive/${pkgver}.tar.gz")
+sha512sums=('e274a07afa419f6dde745f02400efd7288bdd361e1e5232d9484b135b0e2a7902909d3d564217d65379ab38cb318db438dc5e7f93cb190af8cc3bb1d9d19e98c')
+
+prepare() {
+  cd "${srcdir}/${_pkgbase}-${pkgver}"
+
+  # Update the version manually. Otherwise it would look for a git tag which is not present in the distribution.
+  sed -i "s/version = get_project_version.*$/version = '${pkgver}'/" util/update_version.py
+  sed -i "s/^VERSION=.*\$/VERSION='${pkgver}'/" tests/conf.sh
+}
+
+build() {
+  cd "${srcdir}/${_pkgbase}-${pkgver}"
+  make dist
+}
+
+check() {
+  cd "${srcdir}/${_pkgbase}-${pkgver}"
+  # upstream tests are not meant to be executed downstream
+  :
+}
+
+package() {
+  cd "${srcdir}/${_pkgbase}-${pkgver}"
+  make root="${pkgdir}/" install
+}
+
+# vim:set ts=2 sw=2 et:

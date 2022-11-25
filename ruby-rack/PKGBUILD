@@ -1,0 +1,50 @@
+# Maintainer: Levente Polyak <anthraxx[at]archlinux[dot]org>
+# Maintainer: Sergej Pupykin <pupykin.s+arch@gmail.com>
+# Contributor: Alexsandr Pavlov <kidoz at mail dot ru>
+
+_gemname=rack
+pkgname=ruby-rack
+pkgver=2.2.4
+pkgrel=1
+pkgdesc='Minimal, modular, and adaptable interface for developing web applications'
+url='https://rack.github.io/'
+arch=('any')
+license=('MIT')
+depends=('ruby')
+makedepends=('ruby-rdoc' 'ruby-rake' 'ruby-bundler' 'ruby-minitest'
+             'ruby-minitest-global_expectations' 'ruby-minitest-sprint')
+checkdepends=('ruby-webrick')
+options=('!emptydirs')
+source=(https://github.com/rack/rack/archive/${pkgver}/${pkgname}-${pkgver}.tar.gz)
+sha256sums=('62263ff6b757b205060accb37a1e204d49a4e1c45728254d612cb75470bec5ad')
+sha512sums=('aef54a06efce54d58e600829bbf550162bf68fe710b61b2b81022b2a8581819fb575e03992f493f11ed5f3391349f21cd142f6acc5b6017ec4c8e21cb17e4874')
+
+prepare() {
+  cd ${_gemname}-${pkgver}
+  sed -r 's|~>|>=|g' -i ${_gemname}.gemspec Rakefile
+}
+
+build() {
+  cd ${_gemname}-${pkgver}
+  rake build
+}
+
+check() {
+  cd ${_gemname}-${pkgver}
+  rake test
+}
+
+package() {
+  cd ${_gemname}-${pkgver}
+  local _gemdir="$(gem env gemdir)"
+  gem install --ignore-dependencies --no-user-install -i "${pkgdir}${_gemdir}" \
+    -n "${pkgdir}/usr/bin" pkg/${_gemname}-${pkgver}.gem
+  install -Dm 644 README.rdoc CHANGELOG.md -t "${pkgdir}/usr/share/doc/${pkgname}"
+  install -Dm 644 MIT-LICENSE -t "${pkgdir}/usr/share/licenses/${pkgname}"
+  install -Dm 644 example/* -t "${pkgdir}/usr/share/doc/${pkgname}/example"
+
+  cd "${pkgdir}/${_gemdir}"
+  rm -r "${pkgdir}/${_gemdir}/cache"
+}
+
+# vim: ts=2 sw=2 et:

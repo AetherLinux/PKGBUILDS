@@ -1,0 +1,40 @@
+# Maintainer: Levente Polyak <anthraxx[at]archlinux[dot]org>
+
+pkgname=python-flask-socketio
+_pkgname=Flask-SocketIO
+pkgver=5.2.0
+pkgrel=1
+pkgdesc='Socket.IO integration for Flask applications'
+url='https://flask-socketio.readthedocs.org/'
+arch=('any')
+license=('MIT')
+depends=('python' 'python-flask' 'python-eventlet' 'python-socketio')
+makedepends=('python-setuptools' 'python-sphinx' 'python-build' 'python-installer' 'python-wheel')
+checkdepends=('python-coverage' 'python-pytest' 'python-tox-current-env' 'flake8' 'python-redis')
+options=('!makeflags')
+source=(https://github.com/miguelgrinberg/Flask-SocketIO/archive/v${pkgver}/${pkgname}-${pkgver}.tar.gz)
+sha512sums=('4e68280988787b6d2b9860cb27a65a5ee6d8ceaa2462ea10e7fc08ce180d6c4a53f2746f18e1c04eb6cb0f0428499a6ee3bb41fca9740a76ee77785018c5b887')
+b2sums=('d300ce88e40a5c3748ff364bd6ae6edd42aaa6d94c9b4f8725cbe66cbbb3c57b0856d3d34117c37af9b820738f7b1781719c9aafb85fb3706dc7546d8aabb8e9')
+
+build() {
+  cd ${_pkgname}-${pkgver}
+  python -m build --wheel --no-isolation
+  make -C docs man text SPHINXBUILD=sphinx-build
+}
+
+check() {
+  cd ${_pkgname}-${pkgver}
+  PYTHONPATH="build/lib" pytest test_socketio.py
+}
+
+package() {
+  cd ${_pkgname}-${pkgver}
+  python -m installer --destdir="${pkgdir}" dist/*.whl
+
+  install -Dm 644 LICENSE -t "${pkgdir}/usr/share/licenses/${pkgname}"
+  install -Dm 644 README.md -t "${pkgdir}/usr/share/doc/${pkgname}"
+  install -Dm 644 docs/_build/text/index.txt -t "${pkgdir}/usr/share/doc/${pkgname}"
+  install -Dm 644 docs/_build/man/flask-socketio.1 "${pkgdir}/usr/share/man/man1/${pkgname}.1"
+}
+
+# vim: ts=2 sw=2 et:

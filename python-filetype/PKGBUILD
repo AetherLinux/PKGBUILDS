@@ -1,0 +1,30 @@
+# Maintainer: Felix Yan <felixonmars@archlinux.org>
+
+pkgname=python-filetype
+pkgver=1.0.10
+pkgrel=1
+pkgdesc="Infer file type and MIME type of any file/buffer"
+url="https://github.com/h2non/filetype.py"
+license=('MIT')
+arch=('any')
+depends=('python')
+makedepends=('python-setuptools')
+source=("https://github.com/h2non/filetype.py/archive/v$pkgver/$pkgname-$pkgver.tar.gz")
+sha512sums=('0b779f1ca1367626a57bbae531d9152abdc818d322ae5580809cd83344626c8bb43e10b609aa0709f8a03656c262bfceb8e4a6092bee45c49df0c274fb1ee0ed')
+
+build() {
+  cd filetype.py-$pkgver
+  python setup.py build
+}
+
+check() {
+  cd filetype.py-$pkgver
+  python -m unittest discover
+}
+
+package() {
+  cd filetype.py-$pkgver
+  python setup.py install --root="$pkgdir" --optimize=1
+
+  install -Dm644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname/
+}

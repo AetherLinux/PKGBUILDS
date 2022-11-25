@@ -1,0 +1,38 @@
+# Maintainer: Levente Polyak <anthraxx[at]archlinux[dot]org>
+# Contributor: Anthony25 <Anthony Ruhier>
+
+_pkgname=Flask-Migrate
+pkgname=python-flask-migrate
+pkgver=3.1.0
+pkgrel=1
+pkgdesc='SQLAlchemy database migrations for Flask applications using Alembic..'
+url='https://github.com/miguelgrinberg/Flask-Migrate/'
+arch=('any')
+license=('MIT')
+depends=('python' 'python-alembic' 'python-flask' 'python-flask-sqlalchemy')
+makedepends=('python-sphinx' 'python-setuptools')
+source=(https://github.com/miguelgrinberg/Flask-Migrate/archive/v${pkgver}/${pkgname}-${pkgver}.tar.gz)
+sha256sums=('f632b8e9e0856ba42cf55302169372bac1bf8d2e44d92f502d4d6f60dd4bfcd4')
+sha512sums=('4e14fa04381c4217e78c3766c86891e88cd2ff4e2eb1ab3c3a51344cbbb192a083246e60cdb6cc4c1ef42bf8108420e3befa1b59c44fe0890e5202fd275b5805')
+
+build() {
+  cd ${_pkgname}-${pkgver}
+  python setup.py build
+  make -j1 -C docs man text SPHINXBUILD=sphinx-build
+}
+
+check() {
+  cd ${_pkgname}-${pkgver}
+  python setup.py test
+}
+
+package() {
+  cd ${_pkgname}-${pkgver}
+  python setup.py install --root="${pkgdir}/" --optimize=1 --skip-build
+  install -Dm 644 README.md CHANGES.md -t "${pkgdir}/usr/share/doc/${pkgname}"
+  install -Dm 644 LICENSE -t "${pkgdir}/usr/share/licenses/${pkgname}"
+  install -Dm 644 docs/_build/text/* -t "${pkgdir}/usr/share/doc/${pkgname}"
+  install -Dm 644 docs/_build/man/flask-migrate.1 "${pkgdir}/usr/share/man/man1/${pkgname}.1"
+}
+
+# vim: ts=2 sw=2 et:
