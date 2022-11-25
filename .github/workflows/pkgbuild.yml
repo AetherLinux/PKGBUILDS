@@ -1,9 +1,7 @@
 name: pkgbuild import
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 env:
   GITHUB_USERNAME: dakkshesh07
@@ -27,9 +25,11 @@ jobs:
       - name: Fetch and Push
         run: |
           curl -fsSL "https://pkgbuild.com/~morganamilo/pacman-static/x86_64/bin/pacman-static" -o pacman-static && chmod +x pacman-static && mv pacman-static /usr/bin/
-          pacman-static -Syu --needed --noconfirm curl ripgrep
+          pacman-static -S --needed --noconfirm curl ripgrep
           git clone https://"${GITHUB_USERNAME}":"${GHUB_TOKEN}"@github.com/AetherLinux/PKGBUILDS.git repo-dir
           cd repo-dir
+          rm -rf *
+          mv ../fetch.sh .
           bash fetch.sh
           git add -A
           git commit -asm "Initial PKGBUILDs import"

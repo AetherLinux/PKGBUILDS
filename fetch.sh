@@ -16,7 +16,7 @@ for pg in $(seq 1 "$tp"); do
                 -b packages/"$x" "$x" 2>/dev/null
 
         if [ $? -eq 0 ]; then
-            dir=$(ls "$x/repos/" | rg -oe '(extra-x86_64|core-x86_64|community-x86_64|extra-any|core-any|community-any)')
+            dir=$(ls "$x/repos/" | rg -oe '(extra-x86_64|core-x86_64|community-x86_64|multilib-x86_64|extra-any|core-any|community-any|multilib-any)')
             mv "$(pwd)/$x/repos/$dir"/* "$(pwd)/$x"/
             rm -rf "$(pwd)/$x/repos" "$(pwd)/$x/trunk" "$(pwd)/$x/.git"
         fi
