@@ -1,0 +1,36 @@
+name: pkgbuild import
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  GITHUB_USERNAME: dakkshesh07
+  GITHUB_EMAIL: dakkshesh5@gmail.com
+  GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/neutron-toolchains/docker-image:arch-neutron
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Configuring git
+        run: |
+          git config --global user.name $GITHUB_USERNAME
+          git config --global user.email $GITHUB_EMAIL
+          gh auth login --with-token <<< $GHUB_TOKEN
+      - name: Fetch and Push
+        run: |
+          curl -fsSL "https://pkgbuild.com/~morganamilo/pacman-static/x86_64/bin/pacman-static" -o pacman-static && chmod +x pacman-static && mv pacman-static /usr/bin/
+          pacman-static -Syu --needed --noconfirm curl ripgrep
+          git clone https://"${GITHUB_USERNAME}":"${GHUB_TOKEN}"@github.com/AetherLinux/PKGBUILDS.git repo-dir
+          cd repo-dir
+          bash fetch.sh
+          git add -A
+          git commit -asm "Initial PKGBUILDs import"
+          git push origin main -f
