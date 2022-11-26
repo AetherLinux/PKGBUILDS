@@ -9,7 +9,7 @@ env:
   GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
 
 jobs:
-  build:
+  fetch:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/neutron-toolchains/docker-image:arch-neutron
@@ -32,5 +32,5 @@ jobs:
           mv ../fetch.sh .
           bash fetch.sh
           git add -A
-          git commit -asm "Initial PKGBUILDs import"
+          git commit -asm "Import PKGBUILDs as of $(date '+%Y-%m-%d')"
           git push origin main -f
