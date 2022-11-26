@@ -30,7 +30,6 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           echo -n "$GPG_SIGNING_KEY" | base64 --decode | gpg --import
           gh auth login --with-token <<< $GHUB_TOKEN
-          sed -i '/E_ROOT/d' /usr/bin/makepkg
           sed -i "s/.*COMPRESSZST=.*/COMPRESSZST=(zstd -c -z -q -10 -T0 -)/" /etc/makepkg.conf
           sed -i "s/.*PACKAGER=.*/PACKAGER='Dakkshesh <dakkshesh5@gmail.com>'/" /etc/makepkg.conf
           sed -i "s/.*GPGKEY=.*/GPGKEY='69FE650875EC4CD630C36FA212E5D2B4F137262E'/" /etc/makepkg.conf
@@ -38,6 +37,7 @@ jobs:
           export outdir="$(pwd)/output"
           sed -i "s|.*PKGDEST=.*|PKGDEST='$outdir'|" /etc/makepkg.conf
           pacman -Syu --noconfirm
+          sed -i '/E_ROOT/d' /usr/bin/makepkg
 
       - name: Get changed files
         id: changed-files
@@ -48,6 +48,7 @@ jobs:
       - name: Rebuild modified packages
         run: |
           for dir in $(echo ${{ steps.changed-files.outputs.all_changed_files }} | xargs dirname | uniq | grep -vP "(.github|fetch.sh|\.)"); do
+            echo "$dir"
             cd "$(pwd)/$dir"
             MAKEFLAGS="-j$(nproc --all)" makepkg -s -c -C --sign --noconfirm
           done

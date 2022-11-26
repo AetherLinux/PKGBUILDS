@@ -5,7 +5,7 @@
 pkgname=aliyun-cli
 _gitcommit=cbacadd14ca3848dad0d449dcbaeefd425b8c03b
 pkgver=3.0.137
-pkgrel=2
+pkgrel=3
 pkgdesc='Alibaba Cloud CLI'
 arch=('x86_64')
 url='https://github.com/aliyun/aliyun-cli'
