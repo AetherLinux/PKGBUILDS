@@ -3,10 +3,10 @@ name: Build & Push
 on:
   push:
     branches:
-      - main
+      - pero-dev
   pull_request:
     branches:
-      - main
+      - pero-dev
 
 env:
   GITHUB_USERNAME: dakkshesh07
