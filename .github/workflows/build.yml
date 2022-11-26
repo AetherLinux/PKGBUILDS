@@ -39,6 +39,8 @@ jobs:
           mkdir output
           export outdir="$(pwd)/output"
           sed -i "s|.*PKGDEST=.*|PKGDEST='$outdir'|" /etc/makepkg.conf
+          pacman -Syu --noconfirm
+
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v34
@@ -49,7 +51,7 @@ jobs:
         run: |
           for dir in $(echo ${{ steps.changed-files.outputs.all_changed_files }} | xargs dirname | uniq | grep -vP "(.github|fetch.sh|\.)"); do
             cd "$(pwd)/$dir"
-            MAKEFLAGS="-j$(nproc --all)" makepkg -d -c -C --sign
+            MAKEFLAGS="-j$(nproc --all)" makepkg -s -c -C --sign --noconfirm
           done
 
       - name: Upload
