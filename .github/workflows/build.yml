@@ -1,0 +1,43 @@
+name: Build & Push
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  GITHUB_USERNAME: dakkshesh07
+  GITHUB_EMAIL: dakkshesh5@gmail.com
+  GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/neutron-toolchains/docker-image:arch-neutron
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Configuring git
+        run: |
+          git config --global user.name $GITHUB_USERNAME
+          git config --global user.email $GITHUB_EMAIL
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          gh auth login --with-token <<< $GHUB_TOKEN
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v34
+        with:
+          since_last_remote_commit: "true"
+
+      - name: List all changed files
+        run: |
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file"
+          done
