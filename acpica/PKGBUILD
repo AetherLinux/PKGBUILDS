@@ -4,7 +4,7 @@
 # Contributor: Alessio 'mOlOk' Bolognino <themolok@gmail.com>
 
 pkgname=acpica
-pkgver=20220331
+pkgver=20221020
 pkgrel=1
 pkgdesc="ACPI tools, including Intel ACPI Source Language compiler"
 arch=(x86_64)
@@ -16,12 +16,14 @@ provides=(iasl)
 conflicts=(iasl)
 replaces=(iasl)
 options=(!makeflags)
-source=(${pkgname}-unix-${pkgver}.tar.gz::https://acpica.org/sites/acpica/files/acpica-unix-${pkgver}.tar.gz)
-sha256sums=('acaff68b14f1e0804ebbfc4b97268a4ccbefcfa053b02ed9924f2b14d8a98e21')
+_gitcommit=28fc163aa29e208678d901d98bb9030b775521b3
+source=(${pkgname}-unix-${pkgver}::"git+https://github.com/acpica/acpica#commit=${_gitcommit}")
+sha256sums=('SKIP')
 
 build() {
   cd acpica-unix-${pkgver}
-  make
+  export CFLAGS="$CFLAGS -Wno-error=dangling-pointer"
+  make -j$(nproc --all)
 }
 
 package() {
