@@ -49,7 +49,7 @@ jobs:
         run: |
           for dir in $(echo ${{ steps.changed-files.outputs.all_changed_files }} | xargs dirname | uniq | grep -vP "(.github|fetch.sh|\.)"); do
             cd "$(pwd)/$dir"
-            makepkg -d -c -C --sign
+            MAKEFLAGS="-j$(nproc --all)" makepkg -d -c -C --sign
           done
 
       - name: Upload
