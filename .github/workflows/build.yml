@@ -55,11 +55,9 @@ jobs:
 
       - name: Upload
         run: |
-          if [ -z "$(ls -A $outdir)" ]; then
-            git clone https://"${GITHUB_USERNAME}":"${GHUB_TOKEN}"@github.com/AetherLinux/packages.git $(pwd)/repo-dir
-            mv $outdir/* $(pwd)/repo-dir/x86_64/
-            cd repo-dir
-            git add -A
-            git commit -asm "Import builds as of $(date '+%Y-%m-%d')" || true
-            git push -f || true
-          fi
+          git clone https://"${GITHUB_USERNAME}":"${GHUB_TOKEN}"@github.com/AetherLinux/packages.git $(pwd)/repo-dir
+          mv $(pwd)/output/* $(pwd)/repo-dir/x86_64/
+          cd repo-dir
+          git add -A
+          git commit -asm "Import builds as of $(date '+%Y-%m-%d')" || true
+          git push -f || true
