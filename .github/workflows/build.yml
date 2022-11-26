@@ -12,9 +12,10 @@ env:
   GITHUB_USERNAME: dakkshesh07
   GITHUB_EMAIL: dakkshesh5@gmail.com
   GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
+  GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
 
 jobs:
-  fetch:
+  build:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/neutron-toolchains/docker-image:arch-neutron
@@ -24,20 +25,40 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Configuring git
+      - name: Pre-Build Setup
         run: |
           git config --global user.name $GITHUB_USERNAME
           git config --global user.email $GITHUB_EMAIL
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          echo -n "$GPG_SIGNING_KEY" | base64 --decode | gpg --import
           gh auth login --with-token <<< $GHUB_TOKEN
+          sed -i '/E_ROOT/d' /usr/bin/makepkg
+          sed -i "s/.*COMPRESSZST=.*/COMPRESSZST=(zstd -c -z -q -10 -T0 -)/" /etc/makepkg.conf
+          sed -i "s/.*PACKAGER=.*/PACKAGER='Dakkshesh <dakkshesh5@gmail.com>'/" /etc/makepkg.conf
+          sed -i "s/.*GPGKEY=.*/GPGKEY='69FE650875EC4CD630C36FA212E5D2B4F137262E'/" /etc/makepkg.conf
+          mkdir output
+          export outdir="$(pwd)/output"
+          sed -i "s|.*PKGDEST=.*|PKGDEST='$outdir'|" /etc/makepkg.conf
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v34
         with:
           since_last_remote_commit: "true"
 
-      - name: List all changed files
+      - name: Rebuild modified packages
         run: |
           for dir in $(echo ${{ steps.changed-files.outputs.all_changed_files }} | xargs dirname | uniq | grep -vP "(.github|fetch.sh|\.)"); do
-            echo "$dir"
+            cd "$(pwd)/$dir"
+            makepkg -d -c -C --sign
           done
+
+      - name: Upload
+        run: |
+          if [ -z "$(ls -A $outdir)" ]; then
+            git clone https://"${GITHUB_USERNAME}":"${GHUB_TOKEN}"@github.com/AetherLinux/packages.git $(pwd)/repo-dir
+            mv $outdir/* $(pwd)/repo-dir/x86_64/
+            cd repo-dir
+            git add -A
+            git commit -asm "Import builds as of $(date '+%Y-%m-%d')" || true
+            git push -f || true
+          fi
