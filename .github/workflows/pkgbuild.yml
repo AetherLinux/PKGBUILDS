@@ -24,9 +24,7 @@ jobs:
           pacman-static -S --needed --noconfirm curl ripgrep
           git clone https://"${GITHUB_USERNAME}":"${GHUB_TOKEN}"@github.com/AetherLinux/PKGBUILDS.git repo-dir
           cd repo-dir
-          rm -rf *
-          mv ../fetch.sh .
           bash fetch.sh
           git add -A
-          git commit -asm "[skip ci] Import PKGBUILDs as of $(date '+%Y-%m-%d')"
-          git push origin main -f
+          git commit -asm "[skip ci] Import PKGBUILDs as of $(date '+%Y-%m-%d')" || true
+          git push origin main -f || true
