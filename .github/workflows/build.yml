@@ -43,6 +43,11 @@ jobs:
         run: |
           for dir in $(echo ${{ steps.changed-files.outputs.all_changed_files }} | xargs dirname | uniq | grep -vP "(.github|fetch.sh|\.)"); do
             echo "$dir"
+            source "$(pwd)/$dir/PKGBUILD"
+            for i in "${validpgpkeys[@]}"
+            do
+               gpg --recv-key "$i"
+            done
             cd "$(pwd)/$dir"
             MAKEFLAGS="-j$(nproc --all)" makepkg -s -c -C --sign --noconfirm
             cd ..
