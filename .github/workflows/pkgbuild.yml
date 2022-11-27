@@ -32,5 +32,5 @@ jobs:
           mv ../fetch.sh .
           bash fetch.sh
           git add -A
-          git commit -asm "Import PKGBUILDs as of $(date '+%Y-%m-%d')"
+          git commit -asm "[skip ci] Import PKGBUILDs as of $(date '+%Y-%m-%d')"
           git push origin main -f
