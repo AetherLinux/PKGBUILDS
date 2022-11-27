@@ -1,5 +1,4 @@
 name: Build & Push
-
 on:
   push:
     branches:
@@ -7,19 +6,16 @@ on:
   pull_request:
     branches:
       - main
-
 env:
   GITHUB_USERNAME: dakkshesh07
   GITHUB_EMAIL: dakkshesh5@gmail.com
   GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
   GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/neutron-toolchains/docker-image:arch-neutron
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -38,24 +34,38 @@ jobs:
           sed -i "s|.*PKGDEST=.*|PKGDEST='$outdir'|" /etc/makepkg.conf
           pacman -Syu --noconfirm
           sed -i '/E_ROOT/d' /usr/bin/makepkg
-
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v34
         with:
           since_last_remote_commit: "true"
-
       - name: Rebuild modified packages
         run: |
           for dir in $(echo ${{ steps.changed-files.outputs.all_changed_files }} | xargs dirname | uniq | grep -vP "(.github|fetch.sh|\.)"); do
             echo "$dir"
             cd "$(pwd)/$dir"
             MAKEFLAGS="-j$(nproc --all)" makepkg -s -c -C --sign --noconfirm
+            cd ..
           done
-
       - name: Upload
         run: |
           git clone https://"${GITHUB_USERNAME}":"${GHUB_TOKEN}"@github.com/AetherLinux/packages.git $(pwd)/repo-dir
+          cd repo-dir
+          for dir in $(echo ${{ steps.changed-files.outputs.all_changed_files }} | xargs dirname | uniq | grep -vP "(.github|fetch.sh|\.)"); do
+            echo "$dir"
+            old_pkg=$(grep -E -A1 "\[${dir}\]" pkglist | tail -n1)
+            source ../$dir/PKGBUILD
+            new_pkg="$pkgname-$pkgver-$pkgrel-$arch.pkg.tar.zst"
+            if [ -z "$old_pkg" ]
+            then
+                  echo -e "[$dir]\n$new_pkg\n" >> "pkglist"
+
+            else
+                  rm -rf $(pwd)/x86_64/$old_pkg
+                  sed -i "s|$old_pkg|$new_pkg|" pkglist
+            fi
+          done
+          cd ..
           mv $(pwd)/output/* $(pwd)/repo-dir/x86_64/
           cd repo-dir
           git add -A
