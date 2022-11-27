@@ -3,8 +3,8 @@
 # Contributor: Andreas 'Segaja' Schleifer <archlinux at segaja dot de>
 
 pkgname=aliyun-cli
-_gitcommit=cbacadd14ca3848dad0d449dcbaeefd425b8c03b
-pkgver=3.0.137
+_gitcommit=1083a5b2b54a67d70d88a0599af606b658e1bd66
+pkgver=3.0.136
 pkgrel=1
 pkgdesc='Alibaba Cloud CLI'
 arch=('x86_64')
@@ -52,7 +52,7 @@ check() {
 
   # for now can't test the `./oss/...` folder, because it needs an env file that is not so easy to have in dev
   go test \
-    ./cli/... ./config/... ./i18n/... ./main/... ./openapi/... ./resource/... || true
+    ./cli/... ./config/... ./i18n/... ./main/... ./openapi/... ./resource/...
 }
 
 package() {

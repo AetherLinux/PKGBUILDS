@@ -1,0 +1,42 @@
+# Maintainer: Filipe Laíns (FFY00) <lains@archlinux.org>
+# Contributor: nfnty <arch@nfnty.se>
+
+pkgname=shotcut
+pkgdesc='Cross-platform Qt based Video Editor'
+pkgver=22.10.25
+pkgrel=1
+arch=('x86_64')
+url='https://www.shotcut.org'
+license=('GPL3')
+depends=('qt5-base' 'qt5-declarative' 'qt5-graphicaleffects' 'qt5-multimedia'
+         'qt5-quickcontrols' 'qt5-quickcontrols2' 'qt5-websockets' 'qt5-x11extras'
+         'mlt' 'movit' 'ffmpeg' 'libx264' 'libvpx' 'lame' 'frei0r-plugins' 'ladspa')
+optdepends=('swh-plugins: Several audio filters')
+makedepends=('qt5-tools' 'cmake' 'ninja')
+options=('debug')
+source=("$pkgname-$pkgver.tar.gz::https://github.com/mltframework/shotcut/archive/v$pkgver.tar.gz")
+sha512sums=('d7b21274cecefdb85960c04b08bbe644c2e147d0dd82b0fa76972768a9cc7c7946ce39cd1ad0c5b80fcdcbfdbf16c15cb79885f977fa12ae5ce24559cd0e7d8d')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+
+  # https://github.com/mltframework/shotcut/issues/1275
+  export CXXFLAGS+=" -DSHOTCUT_NOUPGRADE"
+
+  cmake \
+    -Bbuild \
+    -GNinja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DSHOTCUT_VERSION=${pkgver}
+  cmake --build build --verbose
+
+  ninja -C build translations
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  DESTDIR="${pkgdir}" cmake --install build
+}
+
+# vim:set ft=sh sw=2 sts=2 et:
