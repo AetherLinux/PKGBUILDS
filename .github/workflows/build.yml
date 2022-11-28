@@ -80,41 +80,41 @@ jobs:
       - name: Upload
         run: |
           git clone https://"${GITHUB_USERNAME}":"${GHUB_TOKEN}"@github.com/AetherLinux/packages.git $(pwd)/repo-dir
-          cd repo-dir
+          cd $(pwd)/repo-dir
           if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
             for dir in $(echo ${{ steps.changed-files.outputs.all_changed_files }} | xargs dirname | uniq | grep -vP "(.github|fetch.sh|\.)"); do
               echo "$dir"
-              old_pkg=$(grep -E -A1 "\[${dir}\]" pkglist | tail -n1)
-              source ../$dir/PKGBUILD
+              old_pkg=$(grep -E -A1 "\[${dir}\]" $(pwd)/pkglist | tail -n1)
+              source $(pwd)/../$dir/PKGBUILD
               new_pkg="$pkgname-$pkgver-$pkgrel-$arch.pkg.tar.zst"
               if [ -z "$old_pkg" ]
               then
-                    echo -e "[$dir]\n$new_pkg\n" >> "pkglist"
+                    echo -e "[$dir]\n$new_pkg\n" >> "$(pwd)/pkglist"
 
               else
                     rm -rf $(pwd)/x86_64/$old_pkg
-                    sed -i "s|$old_pkg|$new_pkg|" pkglist
+                    sed -i "s|$old_pkg|$new_pkg|" $(pwd)/pkglist
               fi
             done
           else
             for dir in ${{ github.event.inputs.packages }}; do
               echo "$dir"
-              old_pkg=$(grep -E -A1 "\[${dir}\]" pkglist | tail -n1)
-              source ../$dir/PKGBUILD
+              old_pkg=$(grep -E -A1 "\[${dir}\]" $(pwd)/pkglist | tail -n1)
+              source $(pwd)/../$dir/PKGBUILD
               new_pkg="$pkgname-$pkgver-$pkgrel-$arch.pkg.tar.zst"
               if [ -z "$old_pkg" ]
               then
-                    echo -e "[$dir]\n$new_pkg\n" >> "pkglist"
+                    echo -e "[$dir]\n$new_pkg\n" >> "$(pwd)/pkglist"
 
               else
                     rm -rf $(pwd)/x86_64/$old_pkg
-                    sed -i "s|$old_pkg|$new_pkg|" pkglist
+                    sed -i "s|$old_pkg|$new_pkg|" $(pwd)/pkglist
               fi
             done
           fi
-          cd ..
+          cd $(pwd)/..
           mv $(pwd)/output/* $(pwd)/repo-dir/x86_64/
-          cd repo-dir
+          cd $(pwd)/repo-dir
           git add -A
           git commit -asm "Import builds as of $(date '+%Y-%m-%d')" || true
           git push -f || true
