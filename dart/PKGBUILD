@@ -1,0 +1,52 @@
+# Maintainer: Alexander Rødseth <rodseth@gmail.com>
+# Maintainer: Felix Yan <felixonmars@archlinux.org>
+# Maintainer: Orhun Parmaksız <orhun@archlinux.org>
+# Contributor: T. Jameson Little <t.jameson.little at gmail dot com>
+# Contributor: Usagi Ito <usagi@WonderRabbitProject.net>
+# Contributor: siasia <http://pastebin.com/qsBEmNCw>
+# Contributor: Julien Nicoulaud <julien.nicoulaud@gmail.com>
+
+pkgname=dart
+pkgver=2.18.4
+pkgrel=1
+pkgdesc='The dart programming language SDK'
+arch=('x86_64')
+url='https://www.dartlang.org/'
+depends=('bash')
+license=('BSD')
+makedepends=('setconf')
+options=('!strip')
+source=("$pkgname-$pkgver-64.zip::https://storage.googleapis.com/dart-archive/channels/stable/release/$pkgver/sdk/dartsdk-linux-x64-release.zip")
+sha512sums=('21ea9e905fb17d92d584c5cb73fb2bb0890e8f76e097da3ca417b3842196e80e1548e32bca9b1c257885995c462f065cca12211bc2eac4bcf320101a9425530e')
+
+prepare() {
+  # Fix permissions
+  find "$pkgname-sdk" -type d -exec chmod a+rx '{}' + \
+    -or -type f -exec chmod a+r '{}' +
+
+  cd "$pkgname-sdk/bin"
+
+  # Extract license (AUTHORS and LICENSE files are missing)
+  head -n5 "../include/dart_api.h" > ../../LICENSE
+}
+
+package() {
+  # Create directories
+  install -d "$pkgdir"{"/opt/$pkgname-sdk",/usr/{bin,"share/doc/$pkgname"}}
+
+  # Package the files
+  cp -a "$pkgname-sdk/"* "$pkgdir/opt/$pkgname-sdk/"
+
+  # Set up symbolic links for the executables
+  for f in dart dartaotruntime; do
+    ln -s "/opt/$pkgname-sdk/bin/$f" "$pkgdir/usr/bin/$f"
+  done
+
+  # Package documentation
+  install -Dm644 "$pkgdir/opt/$pkgname-sdk/README" -t "$pkgdir/usr/share/doc/$pkgname"
+
+  # BSD License
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+
+# vim:set ts=2 sw=2 et:
