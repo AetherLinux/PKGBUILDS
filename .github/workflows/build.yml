@@ -6,6 +6,11 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: "Packages to rebuild"
+        required: true
 env:
   GITHUB_USERNAME: dakkshesh07
   GITHUB_EMAIL: dakkshesh5@gmail.com
@@ -44,35 +49,66 @@ jobs:
           since_last_remote_commit: "true"
       - name: Rebuild modified packages
         run: |
-          for dir in $(echo ${{ steps.changed-files.outputs.all_changed_files }} | xargs dirname | uniq | grep -vP "(.github|fetch.sh|\.)"); do
-            echo "$dir"
-            source "$(pwd)/$dir/PKGBUILD"
-            for i in "${validpgpkeys[@]}"
-            do
-               gpg --recv-key "$i"
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            for dir in $(echo ${{ steps.changed-files.outputs.all_changed_files }} | xargs dirname | uniq | grep -vP "(.github|fetch.sh|\.)"); do
+              echo "$dir"
+              source "$(pwd)/$dir/PKGBUILD"
+              for i in "${validpgpkeys[@]}"
+              do
+                 gpg --recv-key "$i"
+              done
+              cd "$(pwd)/$dir"
+              MAKEFLAGS="-j$(nproc --all)" makepkg -s -c -C --sign --noconfirm
+              cd ..
             done
-            cd "$(pwd)/$dir"
-            MAKEFLAGS="-j$(nproc --all)" makepkg -s -c -C --sign --noconfirm
-            cd ..
-          done
+          else
+            for dir in ${{ github.event.inputs.packages }}; do
+              echo "$dir"
+              source "$(pwd)/$dir/PKGBUILD"
+              for i in "${validpgpkeys[@]}"
+              do
+                 gpg --recv-key "$i"
+              done
+              cd "$(pwd)/$dir"
+              MAKEFLAGS="-j$(nproc --all)" makepkg -s -c -C --sign --noconfirm
+              cd ..
+            done
+          fi
       - name: Upload
         run: |
           git clone https://"${GITHUB_USERNAME}":"${GHUB_TOKEN}"@github.com/AetherLinux/packages.git $(pwd)/repo-dir
           cd repo-dir
-          for dir in $(echo ${{ steps.changed-files.outputs.all_changed_files }} | xargs dirname | uniq | grep -vP "(.github|fetch.sh|\.)"); do
-            echo "$dir"
-            old_pkg=$(grep -E -A1 "\[${dir}\]" pkglist | tail -n1)
-            source ../$dir/PKGBUILD
-            new_pkg="$pkgname-$pkgver-$pkgrel-$arch.pkg.tar.zst"
-            if [ -z "$old_pkg" ]
-            then
-                  echo -e "[$dir]\n$new_pkg\n" >> "pkglist"
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            for dir in $(echo ${{ steps.changed-files.outputs.all_changed_files }} | xargs dirname | uniq | grep -vP "(.github|fetch.sh|\.)"); do
+              echo "$dir"
+              old_pkg=$(grep -E -A1 "\[${dir}\]" pkglist | tail -n1)
+              source ../$dir/PKGBUILD
+              new_pkg="$pkgname-$pkgver-$pkgrel-$arch.pkg.tar.zst"
+              if [ -z "$old_pkg" ]
+              then
+                    echo -e "[$dir]\n$new_pkg\n" >> "pkglist"
 
-            else
-                  rm -rf $(pwd)/x86_64/$old_pkg
-                  sed -i "s|$old_pkg|$new_pkg|" pkglist
-            fi
-          done
+              else
+                    rm -rf $(pwd)/x86_64/$old_pkg
+                    sed -i "s|$old_pkg|$new_pkg|" pkglist
+              fi
+            done
+          else
+            for dir in ${{ github.event.inputs.packages }}; do
+              echo "$dir"
+              old_pkg=$(grep -E -A1 "\[${dir}\]" pkglist | tail -n1)
+              source ../$dir/PKGBUILD
+              new_pkg="$pkgname-$pkgver-$pkgrel-$arch.pkg.tar.zst"
+              if [ -z "$old_pkg" ]
+              then
+                    echo -e "[$dir]\n$new_pkg\n" >> "pkglist"
+
+              else
+                    rm -rf $(pwd)/x86_64/$old_pkg
+                    sed -i "s|$old_pkg|$new_pkg|" pkglist
+              fi
+            done
+          fi
           cd ..
           mv $(pwd)/output/* $(pwd)/repo-dir/x86_64/
           cd repo-dir
