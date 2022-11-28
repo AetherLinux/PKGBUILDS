@@ -37,6 +37,9 @@ jobs:
           sed -i "s/.*COMPRESSZST=.*/COMPRESSZST=(zstd -c -z -q -10 -T0 -)/" /etc/makepkg.conf
           sed -i "s/.*PACKAGER=.*/PACKAGER='Dakkshesh <dakkshesh5@gmail.com>'/" /etc/makepkg.conf
           sed -i "s/.*GPGKEY=.*/GPGKEY='69FE650875EC4CD630C36FA212E5D2B4F137262E'/" /etc/makepkg.conf
+          sed -i "s/-O2/-O3/" /etc/makepkg.conf
+          sed -i "s/-O1/-O3/" /etc/makepkg.conf
+          sed -i 's/.*LTOFLAGS=.*/LTOFLAGS="-flto=auto -flto-compression-level=10 -ffunction-sections -fdata-sections"/' /etc/makepkg.conf
           mkdir output
           export outdir="$(pwd)/output"
           sed -i "s|.*PKGDEST=.*|PKGDEST='$outdir'|" /etc/makepkg.conf
