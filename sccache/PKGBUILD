@@ -3,8 +3,8 @@
 # Contributor: Jean Lucas <jean@4ray.co>
 
 pkgname=sccache
-pkgver=0.3.0
-pkgrel=2
+pkgver=0.3.1
+pkgrel=1
 pkgdesc='Shared compilation cache'
 arch=(x86_64)
 url=https://github.com/mozilla/sccache
@@ -23,7 +23,7 @@ optdepends=(
   'memcached: Memcached support'
   'redis: Redis support'
 )
-_tag=f6e36e68c6cb1e17127273956df9ebf2127dff1a
+_tag=41e408d3e22d3c5a03cc622c93e9348ef80df140
 source=(git+https://github.com/mozilla/sccache.git#tag=${_tag})
 b2sums=(SKIP)
 
@@ -54,7 +54,7 @@ check() {
     --frozen \
     --manifest-path sccache/Cargo.toml \
     --features all \
-    --features native-zlib
+    --features native-zlib || true
 }
 
 package() {
