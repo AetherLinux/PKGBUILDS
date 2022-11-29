@@ -3,16 +3,17 @@
 # Contributor: judd <jvinet@zeroflux.org>
 
 pkgname=make
-pkgver=4.3
-pkgrel=5
+pkgver=4.4
+pkgrel=1
 pkgdesc="GNU make utility to maintain groups of programs"
 arch=('x86_64')
 url="https://www.gnu.org/software/make"
 license=('GPL3')
 groups=('base-devel')
 depends=('glibc' 'guile')
+options=('lto')
 source=("https://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.lz"{,.sig})
-md5sums=('d5c40e7bd1e97a7404f5d3be982f479a'
+md5sums=('5da8b0fcc500de9c254ca59e58558b27'
          'SKIP')
 validpgpkeys=('6D4EEB02AD834703510B117680CB727A20C79BB2')   # Paul Smith
 
