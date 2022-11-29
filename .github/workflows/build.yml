@@ -43,7 +43,7 @@ jobs:
           mkdir output
           export outdir="$(pwd)/output"
           sed -i "s|.*PKGDEST=.*|PKGDEST='$outdir'|" /etc/makepkg.conf
-          pacman -Syu --noconfirm
+          pip uninstall -y pytz setuptools appdirs && pacman -Syu --noconfirm
           sed -i '/E_ROOT/d' /usr/bin/makepkg
       - name: Get changed files
         id: changed-files
