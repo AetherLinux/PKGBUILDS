@@ -83,33 +83,11 @@ jobs:
           cd $(pwd)/repo-dir
           if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
             for dir in $(echo ${{ steps.changed-files.outputs.all_changed_files }} | xargs dirname | uniq | grep -vP "(.github|fetch.sh|\.)"); do
-              echo "$dir"
-              old_pkg=$(grep -E -A1 "\[${dir}\]" $(pwd)/pkglist | tail -n1)
-              source $(pwd)/../$dir/PKGBUILD
-              new_pkg="$pkgname-$pkgver-$pkgrel-$arch.pkg.tar.zst"
-              if [ -z "$old_pkg" ]
-              then
-                    echo -e "[$dir]\n$new_pkg\n" >> "$(pwd)/pkglist"
-
-              else
-                    rm -rf $(pwd)/x86_64/$old_pkg
-                    sed -i "s|$old_pkg|$new_pkg|" $(pwd)/pkglist
-              fi
+              bash -x $(pwd)/../push.sh $dir $(pwd)
             done
           else
             for dir in ${{ github.event.inputs.packages }}; do
-              echo "$dir"
-              old_pkg=$(grep -E -A1 "\[${dir}\]" $(pwd)/pkglist | tail -n1)
-              source $(pwd)/../$dir/PKGBUILD
-              new_pkg="$pkgname-$pkgver-$pkgrel-$arch.pkg.tar.zst"
-              if [ -z "$old_pkg" ]
-              then
-                    echo -e "[$dir]\n$new_pkg\n" >> "$(pwd)/pkglist"
-
-              else
-                    rm -rf $(pwd)/x86_64/$old_pkg
-                    sed -i "s|$old_pkg|$new_pkg|" $(pwd)/pkglist
-              fi
+              bash -x $(pwd)/../push.sh $dir $(pwd)
             done
           fi
           cd $(pwd)/..
