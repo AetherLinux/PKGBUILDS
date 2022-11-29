@@ -20,13 +20,18 @@ options=(debug emptydirs)
 source=(
   https://people.redhat.com/sgrubb/audit/$pkgname-$pkgver.tar.gz
   $pkgbase-3.0.8-config_paths.patch
+  audit-3.0.8-flex-array-workaround.patch
 )
 sha512sums=('5219eb0b41746eca3406008a97731c0083e7be50ec88563a39537de22cb69fe88490f5fe5a11535930f360b11a62538e2ff6cbe39e059cd760038363954ef4d6'
-            'bc699123f810abcf9300728bf61d7fcfcc83677b75fbeb713fb24cc11b2f9edf687661aab70766acde7c3c41c6a62f8e0a54cdfb49d1c7ce2246b67fbe3feec5')
+            'bc699123f810abcf9300728bf61d7fcfcc83677b75fbeb713fb24cc11b2f9edf687661aab70766acde7c3c41c6a62f8e0a54cdfb49d1c7ce2246b67fbe3feec5'
+            '09b93e1204106eaf536ccd5b1c1fa88bd34a4b39b2a5534e27020b0c9fe1b50501b044e55e84fa97dffb9037ffe8291da05a7fae61bcf52800a46e1874b6bae7')
 
 prepare() {
   # replace the use of /sbin with /usr/bin in configs
   patch -Np1 -d $pkgbase-$pkgver -i ../$pkgbase-3.0.8-config_paths.patch
+  # flex array workaround
+  cp /usr/include/linux/audit.h $pkgbase-$pkgver/lib/
+  patch -Np1 -d $pkgbase-$pkgver -i ../audit-3.0.8-flex-array-workaround.patch
 }
 
 build() {
