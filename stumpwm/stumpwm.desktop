@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=Stumpwm
-Comment=Tiling, keyboard driven Common Lisp window manager
-TryExec=stumpwm
-Exec=stumpwm
-Type=Application
-
-[X-Window Manager]
-SessionManaged=true
