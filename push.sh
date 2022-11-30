@@ -3,14 +3,20 @@
 dir="$1"
 echo $2
 echo "$dir"
-old_pkg=$(grep -E -A1 "\[${dir}\]" "$2/pkglist" | tail -n1)
-echo "$old_pkg"
+pkglist_name=$(echo $dir | tr '-' '_')
+source "$2/pkglist"
+old_pkgs=("${pkglist_name[@]}")
 source "$2/../$dir/PKGBUILD"
-new_pkg="$pkgname-$pkgver-$pkgrel-$arch.pkg.tar.zst"
-echo "$new_pkg"
-if [ -z "$old_pkg" ]; then
-	echo -e "[$dir]\n$new_pkg\n" >>"$2/pkglist"
+new_pkgs=("${pkgname[@]}")
+new_pkgs=("${new_pkgs[@]/%/-${pkgver}-${pkgrel}-${arch}.pkg.tar.zst}")
+
+if [ -z "$old_pkgs" ]; then
+    echo -e "$pkglist_name=(${new_pkgs[@]})" >>"$2/pkglist"
 else
-	rm -rf "$2/x86_64/$old_pkg"
-	sed -i "s|$old_pkg|$new_pkg|" "$2/pkglist"
+    for pkg in "${old_pkgs[@]}"; do
+        echo "Removing: $pkg"
+        rm -rf "$2/x86_64/$pkg"
+    done
+    new_pkgs_sigs=("${new_pkgs[@]/%/.sig}")
+    sed -i "s|.*$pkglist_name=.*|$pkglist_name=(${new_pkgs[@]} ${new_pkgs_sigs[@]})|" "$2/pkglist"
 fi
