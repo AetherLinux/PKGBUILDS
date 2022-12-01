@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 
 dir="$1"
-echo $2
-echo "$dir"
+echo "$2"
+echo "dir: $dir"
 pkglist_name=$(echo $dir | tr '-' '_')
+echo "pkglist_name: $pkglist_name"
 source "$2/pkglist"
 old_pkgs=("${pkglist_name[@]}")
+echo "old: ${old_pkgs[@]}"
 source "$2/../$dir/PKGBUILD"
 new_pkgs=("${pkgname[@]}")
 new_pkgs=("${new_pkgs[@]/%/-${pkgver}-${pkgrel}-${arch}.pkg.tar.zst}")
+echo "new: ${new_pkgs[@]}"
 
-if [ -z "$old_pkgs" ]; then
+if [ -z "${old_pkgs[@]}" ]; then
     echo -e "$pkglist_name=(${new_pkgs[@]})" >>"$2/pkglist"
 else
     for pkg in "${old_pkgs[@]}"; do
