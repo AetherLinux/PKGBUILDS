@@ -6,7 +6,8 @@ echo "dir: $dir"
 pkglist_name=$(echo $dir | tr '-' '_')
 echo "pkglist_name: $pkglist_name"
 source "$2/pkglist"
-old_pkgs=("${pkglist_name[@]}")
+old_pkgs="$pkglist_name[@]"
+old_pkgs=(${!old_pkgs})
 echo "old: ${old_pkgs[@]}"
 source "$2/../$dir/PKGBUILD"
 new_pkgs=("${pkgname[@]}")
