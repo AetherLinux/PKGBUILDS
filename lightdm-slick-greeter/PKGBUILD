@@ -1,0 +1,37 @@
+# Maintainer: Alexander Epaneshnikov <alex19ep@archlinux.org>
+# Contributor: Sam Burgos <santiago.burgos1089@gmail.com>
+
+pkgname=lightdm-slick-greeter
+pkgver=1.5.9
+pkgrel=1
+pkgdesc='A slick-looking LightDM greeter'
+arch=('x86_64')
+url="https://github.com/linuxmint/slick-greeter"
+license=('GPL3')
+depends=('cairo' 'freetype2' 'gtk3' 'libcanberra' 'libxext' 'lightdm' 'pixman'
+         'python' 'xorg-server')
+optdepends=('numlockx: enable numerical keypad on supported keyboard')
+makedepends=('intltool' 'vala' 'gnome-common')
+source=("${pkgname}-${pkgver}.tar.gz::$url/archive/${pkgver}.tar.gz")
+sha512sums=('df04fa85cd853063867f820427c46a6b623b7328fba48f8f72d9cddb43cc8bf47e70f5cdf39d45d1c6792cc4efe4f50b36babd12786f3f9d9c4877e163053778')
+b2sums=('a3434daf1e5d93ce5915c810c2ec4b7799f36358ffaf0449bc02067039c1132d4606d1ef301f5d5828480d05df3277733f5976e68f66b92894361b0cb2164316')
+
+prepare() {
+	cd slick-greeter-${pkgver}
+	NOCONFIGURE=1 ./autogen.sh
+}
+
+build() {
+	cd slick-greeter-${pkgver}
+	./configure --prefix=/usr --sysconfdir=/etc --sbindir=/usr/bin \
+             --libexecdir=/usr/lib/lightdm
+	make
+}
+
+package() {
+	cd slick-greeter-${pkgver}
+	make DESTDIR="${pkgdir}" install
+	# adjust launcher name
+	mv $pkgdir/usr/share/xgreeters/slick-greeter.desktop \
+    $pkgdir/usr/share/xgreeters/lightdm-slick-greeter.desktop
+}
